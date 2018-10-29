@@ -18,7 +18,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "examples/yields/model_yield_wprior.stan");
-    reader.add_event(59, 57, "end", "examples/yields/model_yield_wprior.stan");
+    reader.add_event(40, 38, "end", "examples/yields/model_yield_wprior.stan");
     return reader;
 }
 
@@ -107,10 +107,6 @@ public:
                     }
                 }
             }
-            size_t S_i_0_max__ = T_j;
-            for (size_t i_0__ = 0; i_0__ < S_i_0_max__; ++i_0__) {
-                check_greater_or_equal(function__, "S[i_0__]", S[i_0__], 0);
-            }
 
             current_statement_begin__ = 6;
             validate_non_negative_index("P", "T_j", T_j);
@@ -145,8 +141,8 @@ public:
             validate_non_negative_index("sigma", "M_max", M_max);
             num_params_r__ += M_max;
             current_statement_begin__ = 12;
-            validate_non_negative_index("sds", "T_j", T_j);
-            num_params_r__ += T_j;
+            validate_non_negative_index("sds", "3", 3);
+            num_params_r__ += 3;
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return
@@ -184,7 +180,7 @@ public:
             }
         }
         try {
-            writer__.matrix_lub_unconstrain(-(1), 1, a);
+            writer__.matrix_unconstrain(a);
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable a: ") + e.what()), current_statement_begin__, prog_reader__());
         }
@@ -212,10 +208,10 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable sds missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("sds");
         pos__ = 0U;
-        validate_non_negative_index("sds", "T_j", T_j);
-        context__.validate_dims("parameter initialization", "sds", "vector_d", context__.to_vec(T_j));
-        Eigen::Matrix<double, Eigen::Dynamic, 1> sds(T_j);
-        size_t sds_j_1_max__ = T_j;
+        validate_non_negative_index("sds", "3", 3);
+        context__.validate_dims("parameter initialization", "sds", "vector_d", context__.to_vec(3));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> sds(3);
+        size_t sds_j_1_max__ = 3;
         for (size_t j_1__ = 0; j_1__ < sds_j_1_max__; ++j_1__) {
             sds(j_1__) = vals_r__[pos__++];
         }
@@ -261,9 +257,9 @@ public:
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> a;
             (void) a;  // dummy to suppress unused var warning
             if (jacobian__)
-                a = in__.matrix_lub_constrain(-(1), 1, 3, T_j, lp__);
+                a = in__.matrix_constrain(3, T_j, lp__);
             else
-                a = in__.matrix_lub_constrain(-(1), 1, 3, T_j);
+                a = in__.matrix_constrain(3, T_j);
 
             current_statement_begin__ = 11;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> sigma;
@@ -277,26 +273,19 @@ public:
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> sds;
             (void) sds;  // dummy to suppress unused var warning
             if (jacobian__)
-                sds = in__.vector_lb_constrain(0, T_j, lp__);
+                sds = in__.vector_lb_constrain(0, 3, lp__);
             else
-                sds = in__.vector_lb_constrain(0, T_j);
+                sds = in__.vector_lb_constrain(0, 3);
 
             // transformed parameters
-            current_statement_begin__ = 18;
-            validate_non_negative_index("r_tilde", "T_j", T_j);
-            validate_non_negative_index("r_tilde", "J_max", J_max);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> r_tilde(T_j, J_max);
-            stan::math::initialize(r_tilde, DUMMY_VAR__);
-            stan::math::fill(r_tilde, DUMMY_VAR__);
-
-            current_statement_begin__ = 19;
+            current_statement_begin__ = 16;
             validate_non_negative_index("r", "T_j", T_j);
             validate_non_negative_index("r", "J_max", J_max);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> r(T_j, J_max);
             stan::math::initialize(r, DUMMY_VAR__);
             stan::math::fill(r, DUMMY_VAR__);
 
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 17;
             validate_non_negative_index("a_tilde", "3", 3);
             validate_non_negative_index("a_tilde", "T_j", T_j);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> a_tilde(3, T_j);
@@ -304,9 +293,18 @@ public:
             stan::math::fill(a_tilde, DUMMY_VAR__);
 
             // transformed parameters block statements
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 18;
             for (int t = 1; t <= T_j; ++t) {
 
+                current_statement_begin__ = 19;
+                for (int j = 1; j <= J_max; ++j) {
+
+                    current_statement_begin__ = 20;
+                    stan::model::assign(r, 
+                                stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                ((-(1) * ((get_base1(get_base1(a,1,"a",1),t,"a",2) + (get_base1(get_base1(a,2,"a",1),t,"a",2) * j)) + (get_base1(get_base1(a,3,"a",1),t,"a",2) * pow(j, 2)))) * j), 
+                                "assigning variable r");
+                }
                 current_statement_begin__ = 22;
                 for (int k = 1; k <= 3; ++k) {
 
@@ -316,34 +314,13 @@ public:
                                 mean(stan::model::rvalue(a, stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, t), stan::model::nil_index_list())), "a")), 
                                 "assigning variable a_tilde");
                 }
-                current_statement_begin__ = 25;
-                for (int j = 1; j <= J_max; ++j) {
-
-                    current_statement_begin__ = 26;
-                    stan::model::assign(r, 
-                                stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                ((-(1) * ((get_base1(get_base1(a,1,"a",1),t,"a",2) + (get_base1(get_base1(a,2,"a",1),t,"a",2) * j)) + (get_base1(get_base1(a,3,"a",1),t,"a",2) * pow(j, 2)))) * j), 
-                                "assigning variable r");
-                }
             }
 
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
 
-            current_statement_begin__ = 18;
-            size_t r_tilde_j_1_max__ = T_j;
-            size_t r_tilde_j_2_max__ = J_max;
-            for (size_t j_1__ = 0; j_1__ < r_tilde_j_1_max__; ++j_1__) {
-                for (size_t j_2__ = 0; j_2__ < r_tilde_j_2_max__; ++j_2__) {
-                    if (stan::math::is_uninitialized(r_tilde(j_1__, j_2__))) {
-                        std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: r_tilde" << "(" << j_1__ << ", " << j_2__ << ")";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable r_tilde: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                    }
-                }
-            }
-            current_statement_begin__ = 19;
+            current_statement_begin__ = 16;
             size_t r_j_1_max__ = T_j;
             size_t r_j_2_max__ = J_max;
             for (size_t j_1__ = 0; j_1__ < r_j_1_max__; ++j_1__) {
@@ -355,7 +332,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 17;
             size_t a_tilde_j_1_max__ = 3;
             size_t a_tilde_j_2_max__ = T_j;
             for (size_t j_1__ = 0; j_1__ < a_tilde_j_1_max__; ++j_1__) {
@@ -370,28 +347,24 @@ public:
 
             // model body
 
-            current_statement_begin__ = 31;
-            lp_accum__.add(gamma_log<propto__>(sigma, 0.001, 0.001));
-            current_statement_begin__ = 32;
-            lp_accum__.add(gamma_log<propto__>(sds, 0.001, 0.001));
-            current_statement_begin__ = 34;
+            current_statement_begin__ = 28;
+            lp_accum__.add(inv_gamma_log<propto__>(sigma, 0.001, 0.001));
+            current_statement_begin__ = 29;
+            lp_accum__.add(inv_gamma_log<propto__>(sds, 0.001, 0.001));
+            current_statement_begin__ = 30;
             for (int t = 1; t <= T_j; ++t) {
 
-                current_statement_begin__ = 35;
+                current_statement_begin__ = 31;
                 for (int m = 1; m <= M_max; ++m) {
 
-                    current_statement_begin__ = 36;
+                    current_statement_begin__ = 32;
                     if (as_bool(logical_gt(get_base1(get_base1(P,t,"P",1),m,"P",2), 0))) {
 
-                        current_statement_begin__ = 37;
+                        current_statement_begin__ = 33;
+                        lp_accum__.add(normal_log<propto__>(stan::model::rvalue(a, stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list())), "a"), stan::model::rvalue(a_tilde, stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list())), "a_tilde"), stan::model::rvalue(sds, stan::model::cons_list(stan::model::index_min_max(1, 3), stan::model::nil_index_list()), "sds")));
+                        current_statement_begin__ = 34;
                         lp_accum__.add(normal_log<propto__>(get_base1(get_base1(P,t,"P",1),m,"P",2), multiply(stan::model::rvalue(S, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_uni(m), stan::model::cons_list(stan::model::index_min_max(1, J_max), stan::model::nil_index_list()))), "S"), transpose(stan::math::exp(stan::model::rvalue(r, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_min_max(1, J_max), stan::model::nil_index_list())), "r")))), get_base1(sigma,m,"sigma",1)));
                     }
-                }
-                current_statement_begin__ = 45;
-                for (int k = 1; k <= 3; ++k) {
-
-                    current_statement_begin__ = 46;
-                    lp_accum__.add(normal_log<propto__>(get_base1(get_base1(a,k,"a",1),t,"a",2), get_base1(get_base1(a_tilde,k,"a_tilde",1),t,"a_tilde",2), get_base1(sds,t,"sds",1)));
                 }
             }
 
@@ -423,7 +396,6 @@ public:
         names__.push_back("a");
         names__.push_back("sigma");
         names__.push_back("sds");
-        names__.push_back("r_tilde");
         names__.push_back("r");
         names__.push_back("a_tilde");
     }
@@ -440,11 +412,7 @@ public:
         dims__.push_back(M_max);
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(T_j);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(T_j);
-        dims__.push_back(J_max);
+        dims__.push_back(3);
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(T_j);
@@ -472,7 +440,7 @@ public:
         (void) function__;  // dummy to suppress unused var warning
 
         // read-transform, write parameters
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> a = in__.matrix_lub_constrain(-(1), 1, 3, T_j);
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> a = in__.matrix_constrain(3, T_j);
         size_t a_j_2_max__ = T_j;
         size_t a_j_1_max__ = 3;
         for (size_t j_2__ = 0; j_2__ < a_j_2_max__; ++j_2__) {
@@ -487,8 +455,8 @@ public:
             vars__.push_back(sigma(j_1__));
         }
 
-        Eigen::Matrix<double, Eigen::Dynamic, 1> sds = in__.vector_lb_constrain(0, T_j);
-        size_t sds_j_1_max__ = T_j;
+        Eigen::Matrix<double, Eigen::Dynamic, 1> sds = in__.vector_lb_constrain(0, 3);
+        size_t sds_j_1_max__ = 3;
         for (size_t j_1__ = 0; j_1__ < sds_j_1_max__; ++j_1__) {
             vars__.push_back(sds(j_1__));
         }
@@ -504,21 +472,14 @@ public:
 
         try {
             // declare and define transformed parameters
-            current_statement_begin__ = 18;
-            validate_non_negative_index("r_tilde", "T_j", T_j);
-            validate_non_negative_index("r_tilde", "J_max", J_max);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> r_tilde(T_j, J_max);
-            stan::math::initialize(r_tilde, DUMMY_VAR__);
-            stan::math::fill(r_tilde, DUMMY_VAR__);
-
-            current_statement_begin__ = 19;
+            current_statement_begin__ = 16;
             validate_non_negative_index("r", "T_j", T_j);
             validate_non_negative_index("r", "J_max", J_max);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> r(T_j, J_max);
             stan::math::initialize(r, DUMMY_VAR__);
             stan::math::fill(r, DUMMY_VAR__);
 
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 17;
             validate_non_negative_index("a_tilde", "3", 3);
             validate_non_negative_index("a_tilde", "T_j", T_j);
             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> a_tilde(3, T_j);
@@ -526,9 +487,18 @@ public:
             stan::math::fill(a_tilde, DUMMY_VAR__);
 
             // do transformed parameters statements
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 18;
             for (int t = 1; t <= T_j; ++t) {
 
+                current_statement_begin__ = 19;
+                for (int j = 1; j <= J_max; ++j) {
+
+                    current_statement_begin__ = 20;
+                    stan::model::assign(r, 
+                                stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                ((-(1) * ((get_base1(get_base1(a,1,"a",1),t,"a",2) + (get_base1(get_base1(a,2,"a",1),t,"a",2) * j)) + (get_base1(get_base1(a,3,"a",1),t,"a",2) * pow(j, 2)))) * j), 
+                                "assigning variable r");
+                }
                 current_statement_begin__ = 22;
                 for (int k = 1; k <= 3; ++k) {
 
@@ -537,15 +507,6 @@ public:
                                 stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list())), 
                                 mean(stan::model::rvalue(a, stan::model::cons_list(stan::model::index_uni(k), stan::model::cons_list(stan::model::index_min_max(1, t), stan::model::nil_index_list())), "a")), 
                                 "assigning variable a_tilde");
-                }
-                current_statement_begin__ = 25;
-                for (int j = 1; j <= J_max; ++j) {
-
-                    current_statement_begin__ = 26;
-                    stan::model::assign(r, 
-                                stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                ((-(1) * ((get_base1(get_base1(a,1,"a",1),t,"a",2) + (get_base1(get_base1(a,2,"a",1),t,"a",2) * j)) + (get_base1(get_base1(a,3,"a",1),t,"a",2) * pow(j, 2)))) * j), 
-                                "assigning variable r");
                 }
             }
 
@@ -556,13 +517,6 @@ public:
 
             // write transformed parameters
             if (include_tparams__) {
-                size_t r_tilde_j_2_max__ = J_max;
-                size_t r_tilde_j_1_max__ = T_j;
-                for (size_t j_2__ = 0; j_2__ < r_tilde_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < r_tilde_j_1_max__; ++j_1__) {
-                        vars__.push_back(r_tilde(j_1__, j_2__));
-                    }
-                }
                 size_t r_j_2_max__ = J_max;
                 size_t r_j_1_max__ = T_j;
                 for (size_t j_2__ = 0; j_2__ < r_j_2_max__; ++j_2__) {
@@ -628,7 +582,7 @@ public:
             param_name_stream__ << "sigma" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sds_j_1_max__ = T_j;
+        size_t sds_j_1_max__ = 3;
         for (size_t j_1__ = 0; j_1__ < sds_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "sds" << '.' << j_1__ + 1;
@@ -638,15 +592,6 @@ public:
         if (!include_gqs__ && !include_tparams__) return;
 
         if (include_tparams__) {
-            size_t r_tilde_j_2_max__ = J_max;
-            size_t r_tilde_j_1_max__ = T_j;
-            for (size_t j_2__ = 0; j_2__ < r_tilde_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < r_tilde_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "r_tilde" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
             size_t r_j_2_max__ = J_max;
             size_t r_j_1_max__ = T_j;
             for (size_t j_2__ = 0; j_2__ < r_j_2_max__; ++j_2__) {
@@ -690,7 +635,7 @@ public:
             param_name_stream__ << "sigma" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sds_j_1_max__ = T_j;
+        size_t sds_j_1_max__ = 3;
         for (size_t j_1__ = 0; j_1__ < sds_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "sds" << '.' << j_1__ + 1;
@@ -700,15 +645,6 @@ public:
         if (!include_gqs__ && !include_tparams__) return;
 
         if (include_tparams__) {
-            size_t r_tilde_j_2_max__ = J_max;
-            size_t r_tilde_j_1_max__ = T_j;
-            for (size_t j_2__ = 0; j_2__ < r_tilde_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < r_tilde_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "r_tilde" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
             size_t r_j_2_max__ = J_max;
             size_t r_j_1_max__ = T_j;
             for (size_t j_2__ = 0; j_2__ < r_j_2_max__; ++j_2__) {
