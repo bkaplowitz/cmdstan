@@ -2,7 +2,7 @@ data {
     int<lower=1> T_j; // number of time periods
     int<lower=1> J_max; //maximum maturity J over all periods
     int<lower=1> M_max; // maximum number of assets in each period
-    matrix[M_max,J_max] S[T_j]; // of assets sold each period //declare for each time period
+    matrix[T_j,J_max] S[M_max]; // of assets sold each period //declare for each time period
     matrix<lower=0>[T_j,M_max] P; // value of P_observed in period t for maturity j // change to P
     }
 
@@ -27,11 +27,11 @@ transformed parameters {
 model {
     sigma ~ inv_gamma(0.001, 0.001);
     sds ~inv_gamma(0.001, 0.001);
-    for (t in 1:T_j) {
-        for (m in 1:M_max) {
+    for (m in 1:M_max) {
+        for (t in 1:T_j) {
             if (P[t,m]>0)  {
                 a[1:3,t]~normal(a_tilde[1:3,t],sds[1:3]);  //can add correlations later if  we want, including between different T's and different a values.
-                P[t,m]~normal((S[t,m,1:J_max]*exp(r[t,1:J_max])'),sigma[m]); //slicing for efficiency.
+                P[t,m]~normal((S[m,t,1:J_max]*exp(r[t,1:J_max])'),sigma[m]); //slicing for efficiency.
                 }
             }            
         }
